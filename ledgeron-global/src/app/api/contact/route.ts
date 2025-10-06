@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { saveSubmission } from '@/utils/formStorage';
+import fs from 'fs/promises';
+import path from 'path';
 
 export type FormSubmission = {
   name: string;
@@ -9,9 +10,44 @@ export type FormSubmission = {
   timestamp?: string;
 };
 
-export async function POST(request: Request) {
+const DATA_DIR = path.join(process.cwd(), 'src', 'data');
+const SUBMISSIONS_FILE = path.join(DATA_DIR, 'submissions.json');
+
+async function saveSubmission(submission: FormSubmission): Promise<void> {
   try {
-    console.log('Received POST request to /api/contact');
+    // Ensure the data directory exists
+    await fs.mkdir(DATA_DIR, { recursive: true });
+
+    // Read existing submissions
+    let submissions: FormSubmission[] = [];
+    try {
+      const data = await fs.readFile(SUBMISSIONS_FILE, 'utf-8');
+      submissions = JSON.parse(data);
+    } catch {
+      // File doesn't exist or is invalid, start with empty array
+    }
+
+    // Add timestamp to submission
+    const submissionWithTimestamp = {
+      ...submission,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Add new submission
+    submissions.push(submissionWithTimestamp);
+
+    // Write back to file
+    await fs.writeFile(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2), 'utf-8');
+  } catch (error) {
+    console.error('Error saving submission:', error);
+    throw error;
+  }
+}
+
+export async function POST(request: Request) {
+  console.log('Received POST request to /api/contact');
+  
+  try {
     const data: FormSubmission = await request.json();
     console.log('Received form data:', data);
 
