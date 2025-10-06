@@ -116,7 +116,7 @@ export function ServicesSection() {
                 </p>
                 <Button
                   href={`/services#${service.title.toLowerCase().replace(/\s+/g, '-')}`}
-                  variant="link"
+                  variant="secondary"
                   className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                 >
                   Learn More →

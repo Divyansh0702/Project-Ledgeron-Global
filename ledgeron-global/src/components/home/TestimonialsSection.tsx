@@ -84,7 +84,7 @@ export function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <div
               key={testimonial.name}
-              ref={el => testimonialRefs.current[index] = el}
+              ref={el => { testimonialRefs.current[index] = el; }}
               className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg"
             >
               {/* Rating */}
