@@ -10,11 +10,50 @@ export default function ContactPage() {
     phone: '',
     message: '',
   });
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
+    setStatus('submitting');
+    setErrorMessage('');
+
+    try {
+      console.log('Submitting form data:', formData);
+      
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (!response.ok) {
+        console.error('Form submission failed:', data.error);
+        throw new Error(data.error || 'Failed to submit form');
+      }
+
+      setStatus('success');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        message: '',
+      });
+
+      // Reset success status after 5 seconds
+      setTimeout(() => {
+        setStatus('idle');
+      }, 5000);
+    } catch (error) {
+      setStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : 'An error occurred');
+    }
   };
 
   const handleChange = (
@@ -122,10 +161,63 @@ export default function ContactPage() {
                 <Button
                   type="submit"
                   variant="primary"
-                  className="w-full text-lg py-4"
+                  className="w-full text-lg py-4 relative"
+                  disabled={status === 'submitting'}
                 >
-                  Send Message
+                  {status === 'submitting' ? (
+                    <>
+                      <span className="opacity-0">Send Message</span>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    </>
+                  ) : (
+                    'Send Message'
+                  )}
                 </Button>
+
+                {/* Form Status Messages */}
+                {status === 'success' && (
+                  <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <p>Message sent successfully! We'll get back to you soon.</p>
+                    </div>
+                  </div>
+                )}
+
+                {status === 'error' && (
+                  <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <p>{errorMessage || 'Failed to send message. Please try again.'}</p>
+                    </div>
+                  </div>
+                )}
               </form>
             </div>
 
