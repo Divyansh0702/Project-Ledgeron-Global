@@ -16,12 +16,15 @@
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgb(var(--background-end-rgb))
-  )
-  rgb(var(--background-start-rgb));
+.bg-grid-pattern {
+  background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+    linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .bg-grid-pattern {
+    background-image: linear-gradient(to right, #374151 1px, transparent 1px),
+      linear-gradient(to bottom, #374151 1px, transparent 1px);
+  }
 }
